@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Page</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <h1>Index Page</h1>
 
     <ul>
@@ -13,6 +8,7 @@
         <li>{{user.name}} - {{user.email}}</li>
         {% endfor %}
     </ul>
-    <a href="{{ url_for('contact') }}">Página de Cadastro</a>
-</body>
-</html>
+    <a href="{{ url_for('create_user') }}">Página de Cadastro</a> |
+    <a href="{{ url_for('list_tasks') }}">Página de Tarefas</a> |
+    <a href="{{ url_for('create_task') }}">Cadastrar Tarefa</a>
+{% endblock %}

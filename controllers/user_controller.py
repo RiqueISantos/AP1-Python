@@ -14,7 +14,9 @@ class UserController:
             name = request.form['name']
             email = request.form['email']
 
-            # validações simples: se usuário já existe no db, etc
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user:
+                return render_template('contact.html', error="Usuário com este e-mail já existe", name=name, email=email)
 
             new_user = User(name=name, email=email)
             db.session.add(new_user)
