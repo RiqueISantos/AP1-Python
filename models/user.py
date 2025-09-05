@@ -1,6 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from models import db
 
 # Cada classe que herda de db.Model se torna uma tabela no banco de dados.
 class User(db.Model): # Declaração de um novo modelo/tabela: User
