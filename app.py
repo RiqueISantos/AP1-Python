@@ -1,9 +1,11 @@
 import os
 from flask import Flask
-from config import Config # importa as 
+from config import Config
 from controllers.user_controller import UserController
 from controllers.task_controller import TaskController
-from models.user import db
+from models import db
+from models.user import User
+from models.task import Task
 
 app = Flask(__name__, template_folder=os.path.join('view', 'templates'))
 app.config.from_object(Config)
@@ -17,7 +19,7 @@ with app.app_context():
 
 # forma alternativa de criar rotas, parâmetros: rota em si, endpoint interno do flask e função a ser executada quando a URL for acessada
 app.add_url_rule('/', view_func=UserController.index, endpoint='index')
-app.add_url_rule('/contact', view_func=UserController.contact, methods=['GET', 'POST'], endpoint='contact')
+app.add_url_rule('/create_user', view_func=UserController.contact, methods=['GET', 'POST'], endpoint='create_user')
 
 # Rotas Tarefas
 app.add_url_rule("/tasks", view_func=TaskController.list_tasks, endpoint="list_tasks")
