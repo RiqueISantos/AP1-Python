@@ -3,9 +3,9 @@ from flask import Flask
 from config import Config
 from controllers.user_controller import UserController
 from controllers.task_controller import TaskController
-from models import db
 from models.user import User
 from models.task import Task
+from models import db
 
 app = Flask(__name__, template_folder=os.path.join('view', 'templates'))
 app.config.from_object(Config)
