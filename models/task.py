@@ -1,6 +1,4 @@
 from models import db
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
 
 class Task(db.Model):
     __tablename__ = "tasks"
