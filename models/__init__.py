@@ -1,3 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from .database import db
+from .aluno_model import Aluno
+from .professor_model import Professor
+from .turma_model import Turma
 
-db = SQLAlchemy()
+__all__ = ['Aluno', 'Professor', 'Turma', 'db']

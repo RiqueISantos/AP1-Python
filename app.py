@@ -1,19 +1,17 @@
-import os
 from flask import Flask
-from config import Config
 from models import db
+from controller.route import setup_routes
+from models.database import db
 
-app = Flask(__name__, template_folder=os.path.join('view', 'templates'))
-app.config.from_object(Config)
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# inicializa o banco de dados
 db.init_app(app)
+setup_routes(app)
 
-# cria tabelas
 with app.app_context():
     db.create_all()
 
-
-
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=True)
