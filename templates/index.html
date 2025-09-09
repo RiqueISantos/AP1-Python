@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>CRUD Escola</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container my-4">
+  <h1 class="mb-4">CRUD Escola - Professores, Turmas e Alunos</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="alert alert-info">
+        {% for msg in messages %}
+          <div>{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ----- Professores ----- -->
+  <h2>Professores</h2>
+  <form action="{{ url_for('professores') }}" method="post" class="mb-3">
+    <div class="row g-2">
+      <div class="col"><input type="text" name="nome" class="form-control" placeholder="Nome" required></div>
+      <div class="col"><input type="number" name="idade" class="form-control" placeholder="Idade" required></div>
+      <div class="col"><input type="text" name="materia" class="form-control" placeholder="Matéria" required></div>
+      <div class="col"><input type="text" name="observacoes" class="form-control" placeholder="Observações"></div>
+      <div class="col"><button type="submit" class="btn btn-primary">Adicionar</button></div>
+    </div>
+  </form>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th><th>Nome</th><th>Idade</th><th>Matéria</th><th>Observações</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for professor in professores %}
+      <tr>
+        <form action="{{ url_for('update_professor', id=professor.id) }}" method="post">
+          <td>{{ professor.id }}</td>
+          <td><input type="text" name="nome" value="{{ professor.nome }}" class="form-control"></td>
+          <td><input type="number" name="idade" value="{{ professor.idade }}" class="form-control"></td>
+          <td><input type="text" name="materia" value="{{ professor.materia }}" class="form-control"></td>
+          <td><input type="text" name="observacoes" value="{{ professor.observacoes }}" class="form-control"></td>
+          <td>
+            <button type="submit" class="btn btn-sm btn-warning">Atualizar</button>
+        </form>
+            <form action="{{ url_for('delete_professor', id=professor.id) }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+            </form>
+          </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ----- Turmas ----- -->
+  <h2>Turmas</h2>
+  <form action="{{ url_for('turmas') }}" method="post" class="mb-3">
+    <div class="row g-2">
+      <div class="col"><input type="text" name="descricao" class="form-control" placeholder="Descrição" required></div>
+      <div class="col"><input type="number" name="professor_id" class="form-control" placeholder="ID do Professor" required></div>
+      <div class="col">
+        <select name="ativo" class="form-control">
+          <option value="true">Ativo</option>
+          <option value="false">Inativo</option>
+        </select>
+      </div>
+      <div class="col"><button type="submit" class="btn btn-primary">Adicionar</button></div>
+    </div>
+  </form>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th><th>Descrição</th><th>Professor ID</th><th>Ativo</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for turma in turmas %}
+      <tr>
+        <form action="{{ url_for('update_turma', id=turma.id) }}" method="post">
+          <td>{{ turma.id }}</td>
+          <td><input type="text" name="descricao" value="{{ turma.descricao }}" class="form-control"></td>
+          <td><input type="number" name="professor_id" value="{{ turma.professor_id }}" class="form-control"></td>
+          <td>
+            <select name="ativo" class="form-control">
+              <option value="true" {% if turma.ativo %}selected{% endif %}>Ativo</option>
+              <option value="false" {% if not turma.ativo %}selected{% endif %}>Inativo</option>
+            </select>
+          </td>
+          <td>
+            <button type="submit" class="btn btn-sm btn-warning">Atualizar</button>
+        </form>
+            <form action="{{ url_for('delete_turma', id=turma.id) }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+            </form>
+          </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ----- Alunos ----- -->
+  <h2>Alunos</h2>
+  <form action="{{ url_for('alunos') }}" method="post" class="mb-3">
+    <div class="row g-2">
+      <div class="col"><input type="text" name="nome" class="form-control" placeholder="Nome" required></div>
+      <div class="col"><input type="number" name="idade" class="form-control" placeholder="Idade" required></div>
+      <div class="col"><input type="number" name="turma_id" class="form-control" placeholder="ID da Turma" required></div>
+      <div class="col"><input type="date" name="data_nascimento" class="form-control" required></div>
+      <div class="col"><input type="number" step="0.01" name="nota_primeiro_semestre" class="form-control" placeholder="Nota 1º Sem" required></div>
+      <div class="col"><input type="number" step="0.01" name="nota_segundo_semestre" class="form-control" placeholder="Nota 2º Sem" required></div>
+      <div class="col"><input type="number" step="0.01" name="media_final" class="form-control" placeholder="Média final" required></div>
+      <div class="col"><button type="submit" class="btn btn-primary">Adicionar</button></div>
+    </div>
+  </form>
+
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>ID</th><th>Nome</th><th>Idade</th><th>Turma ID</th><th>Data Nasc.</th>
+        <th>Nota 1º Sem</th><th>Nota 2º Sem</th><th>Média</th><th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for aluno in alunos %}
+      <tr>
+        <form action="{{ url_for('update_aluno', id=aluno.id) }}" method="post">
+          <td>{{ aluno.id }}</td>
+          <td><input type="text" name="nome" value="{{ aluno.nome }}" class="form-control"></td>
+          <td><input type="number" name="idade" value="{{ aluno.idade }}" class="form-control"></td>
+          <td><input type="number" name="turma_id" value="{{ aluno.turma_id }}" class="form-control"></td>
+          <td><input type="date" name="data_nascimento" value="{{ aluno.data_nascimento }}" class="form-control"></td>
+          <td><input type="number" step="0.01" name="nota_primeiro_semestre" value="{{ aluno.nota_primeiro_semestre }}" class="form-control"></td>
+          <td><input type="number" step="0.01" name="nota_segundo_semestre" value="{{ aluno.nota_segundo_semestre }}" class="form-control"></td>
+          <td><input type="number" step="0.01" name="media_final" value="{{ aluno.media_final }}" class="form-control"></td>
+          <td>
+            <button type="submit" class="btn btn-sm btn-warning">Atualizar</button>
+        </form>
+            <form action="{{ url_for('delete_aluno', id=aluno.id) }}" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+            </form>
+          </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+</body>
+</html>
