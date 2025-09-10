@@ -1,6 +1,0 @@
-app:
-  name: Projeto-API
-
-database:
-  driver: sqlite
-  name: projetoapi.db
