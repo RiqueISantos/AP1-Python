@@ -1,4 +1,4 @@
-from flask import request, render_template, redirect, url_for, flash
+from flask import request, jsonify
 from models.professor_model import Professor
 from models.aluno_model import Aluno
 from models.turma_model import Turma
@@ -7,122 +7,358 @@ from datetime import datetime
 
 def setup_routes(app):
 
-    # ----- CRUD Professor -----
-    @app.route('/professores', methods=['GET', 'POST'])
-    def professores():
-        if request.method == 'POST':
-            professor = Professor(
-                nome=request.form['nome'],
-                idade=int(request.form['idade']),
-                materia=request.form['materia'],
-                observacoes=request.form.get('observacoes', '')
-            )
-            db.session.add(professor)
-            db.session.commit()
-            flash("Professor adicionado!")
-            return redirect(url_for('professores'))
-        
+    # ------------------ CRUD Professores ------------------
+
+    @app.route('/professores', methods=['GET'])
+    def list_professores():
+        """
+        tags:
+          - Professores
+        summary: Lista todos os professores
+        responses:
+          200:
+            description: Lista de professores
+        """
         professores = Professor.query.all()
-        return render_template('index.html', professores=professores)
+        return jsonify([{
+            'id': p.id,
+            'nome': p.nome,
+            'idade': p.idade,
+            'materia': p.materia,
+            'observacoes': p.observacoes
+        } for p in professores])
 
-    @app.route('/professores/update/<int:id>', methods=['POST'])
-    def update_professor(id):
-        professor = Professor.query.get_or_404(id)
-        professor.nome = request.form['nome']
-        professor.idade = int(request.form['idade'])
-        professor.materia = request.form['materia']
-        professor.observacoes = request.form.get('observacoes', '')
+    @app.route('/professores', methods=['POST'])
+    def create_professor():
+        """
+        tags:
+          - Professores
+        summary: Cria um novo professor
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nome: { type: string }
+                  idade: { type: integer }
+                  materia: { type: string }
+                  observacoes: { type: string }
+        responses:
+          201:
+            description: Professor criado com sucesso
+          400:
+            description: Dados inválidos
+        """
+        data = request.get_json()
+        professor = Professor(
+            nome=data['nome'],
+            idade=int(data['idade']),
+            materia=data['materia'],
+            observacoes=data.get('observacoes', '')
+        )
+        db.session.add(professor)
         db.session.commit()
-        flash("Professor atualizado!")
-        return redirect(url_for('professores'))
+        return jsonify({'message': 'Professor criado', 'id': professor.id}), 201
 
-    @app.route('/professores/delete/<int:id>', methods=['POST'])
+    @app.route('/professores/<int:id>', methods=['PUT'])
+    def update_professor(id):
+        """
+        tags:
+          - Professores
+        summary: Atualiza um professor existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+            description: ID do professor
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nome: { type: string }
+                  idade: { type: integer }
+                  materia: { type: string }
+                  observacoes: { type: string }
+        responses:
+          200:
+            description: Professor atualizado
+          404:
+            description: Professor não encontrado
+        """
+        professor = Professor.query.get_or_404(id)
+        data = request.get_json()
+        professor.nome = data['nome']
+        professor.idade = int(data['idade'])
+        professor.materia = data['materia']
+        professor.observacoes = data.get('observacoes', '')
+        db.session.commit()
+        return jsonify({'message': 'Professor atualizado'})
+
+    @app.route('/professores/<int:id>', methods=['DELETE'])
     def delete_professor(id):
+        """
+        tags:
+          - Professores
+        summary: Deleta um professor existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+            description: ID do professor
+        responses:
+          200:
+            description: Professor deletado
+          404:
+            description: Professor não encontrado
+        """
         professor = Professor.query.get_or_404(id)
         db.session.delete(professor)
         db.session.commit()
-        flash("Professor deletado!")
-        return redirect(url_for('professores'))
+        return jsonify({'message': 'Professor deletado'})
 
 
-    # ----- CRUD Turma -----
-    @app.route('/turmas', methods=['GET', 'POST'])
-    def turmas():
-        if request.method == 'POST':
-            turma = Turma(
-                descricao=request.form['descricao'],
-                professor_id=int(request.form['professor_id']),
-                ativo=True if request.form.get('ativo') == 'true' else False
-            )
-            db.session.add(turma)
-            db.session.commit()
-            flash("Turma adicionada!")
-            return redirect(url_for('turmas'))
+    # ------------------ CRUD Turmas ------------------
 
+    @app.route('/turmas', methods=['GET'])
+    def list_turmas():
+        """
+        tags:
+          - Turmas
+        summary: Lista todas as turmas
+        responses:
+          200:
+            description: Lista de turmas
+        """
         turmas = Turma.query.all()
-        professores = Professor.query.all()
-        return render_template('index.html', turmas=turmas, professores=professores)
+        return jsonify([{
+            'id': t.id,
+            'descricao': t.descricao,
+            'professor_id': t.professor_id,
+            'ativo': t.ativo
+        } for t in turmas])
 
-    @app.route('/turmas/update/<int:id>', methods=['POST'])
-    def update_turma(id):
-        turma = Turma.query.get_or_404(id)
-        turma.descricao = request.form['descricao']
-        turma.professor_id = int(request.form['professor_id'])
-        turma.ativo = True if request.form.get('ativo') == 'true' else False
+    @app.route('/turmas', methods=['POST'])
+    def create_turma():
+        """
+        tags:
+          - Turmas
+        summary: Cria uma nova turma
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  descricao: { type: string }
+                  professor_id: { type: integer }
+                  ativo: { type: boolean }
+        responses:
+          201:
+            description: Turma criada
+          400:
+            description: Dados inválidos
+        """
+        data = request.get_json()
+        turma = Turma(
+            descricao=data['descricao'],
+            professor_id=int(data['professor_id']),
+            ativo=data.get('ativo', True)
+        )
+        db.session.add(turma)
         db.session.commit()
-        flash("Turma atualizada!")
-        return redirect(url_for('turmas'))
+        return jsonify({'message': 'Turma criada', 'id': turma.id}), 201
 
-    @app.route('/turmas/delete/<int:id>', methods=['POST'])
+    @app.route('/turmas/<int:id>', methods=['PUT'])
+    def update_turma(id):
+        """
+        tags:
+          - Turmas
+        summary: Atualiza uma turma existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  descricao: { type: string }
+                  professor_id: { type: integer }
+                  ativo: { type: boolean }
+        responses:
+          200:
+            description: Turma atualizada
+          404:
+            description: Turma não encontrada
+        """
+        turma = Turma.query.get_or_404(id)
+        data = request.get_json()
+        turma.descricao = data['descricao']
+        turma.professor_id = int(data['professor_id'])
+        turma.ativo = data.get('ativo', True)
+        db.session.commit()
+        return jsonify({'message': 'Turma atualizada'})
+
+    @app.route('/turmas/<int:id>', methods=['DELETE'])
     def delete_turma(id):
+        """
+        tags:
+          - Turmas
+        summary: Deleta uma turma existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        responses:
+          200:
+            description: Turma deletada
+          404:
+            description: Turma não encontrada
+        """
         turma = Turma.query.get_or_404(id)
         db.session.delete(turma)
         db.session.commit()
-        flash("Turma deletada!")
-        return redirect(url_for('turmas'))
+        return jsonify({'message': 'Turma deletada'})
 
 
-    # ----- CRUD Aluno -----
-    @app.route('/alunos', methods=['GET', 'POST'])
-    def alunos():
-        if request.method == 'POST':
-            data_nascimento = datetime.strptime(request.form['data_nascimento'], '%Y-%m-%d').date()
-            aluno = Aluno(
-                nome=request.form['nome'],
-                idade=int(request.form['idade']),
-                turma_id=int(request.form['turma_id']),
-                data_nascimento=data_nascimento,
-                nota_primeiro_semestre=float(request.form['nota_primeiro_semestre']),
-                nota_segundo_semestre=float(request.form['nota_segundo_semestre']),
-                media_final=float(request.form['media_final'])
-            )
-            db.session.add(aluno)
-            db.session.commit()
-            flash("Aluno adicionado!")
-            return redirect(url_for('alunos'))
+    # ------------------ CRUD Alunos ------------------
 
+    @app.route('/alunos', methods=['GET'])
+    def list_alunos():
+        """
+        tags:
+          - Alunos
+        summary: Lista todos os alunos
+        responses:
+          200:
+            description: Lista de alunos
+        """
         alunos = Aluno.query.all()
-        turmas = Turma.query.all()
-        return render_template('index.html', alunos=alunos, turmas=turmas)
+        return jsonify([{
+            'id': a.id,
+            'nome': a.nome,
+            'idade': a.idade,
+            'turma_id': a.turma_id,
+            'data_nascimento': a.data_nascimento.isoformat(),
+            'nota_primeiro_semestre': a.nota_primeiro_semestre,
+            'nota_segundo_semestre': a.nota_segundo_semestre,
+            'media_final': a.media_final
+        } for a in alunos])
 
-    @app.route('/alunos/update/<int:id>', methods=['POST'])
-    def update_aluno(id):
-        aluno = Aluno.query.get_or_404(id)
-        aluno.nome = request.form['nome']
-        aluno.idade = int(request.form['idade'])
-        aluno.turma_id = int(request.form['turma_id'])
-        aluno.data_nascimento = datetime.strptime(request.form['data_nascimento'], '%Y-%m-%d').date()
-        aluno.nota_primeiro_semestre = float(request.form['nota_primeiro_semestre'])
-        aluno.nota_segundo_semestre = float(request.form['nota_segundo_semestre'])
-        aluno.media_final = float(request.form['media_final'])
+    @app.route('/alunos', methods=['POST'])
+    def create_aluno():
+        """
+        tags:
+          - Alunos
+        summary: Cria um novo aluno
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nome: { type: string }
+                  idade: { type: integer }
+                  turma_id: { type: integer }
+                  data_nascimento: { type: string, format: date }
+                  nota_primeiro_semestre: { type: number }
+                  nota_segundo_semestre: { type: number }
+                  media_final: { type: number }
+        responses:
+          201:
+            description: Aluno criado
+          400:
+            description: Dados inválidos
+        """
+        data = request.get_json()
+        aluno = Aluno(
+            nome=data['nome'],
+            idade=int(data['idade']),
+            turma_id=int(data['turma_id']),
+            data_nascimento=datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date(),
+            nota_primeiro_semestre=float(data['nota_primeiro_semestre']),
+            nota_segundo_semestre=float(data['nota_segundo_semestre']),
+            media_final=float(data['media_final'])
+        )
+        db.session.add(aluno)
         db.session.commit()
-        flash("Aluno atualizado!")
-        return redirect(url_for('alunos'))
+        return jsonify({'message': 'Aluno criado', 'id': aluno.id}), 201
 
-    @app.route('/alunos/delete/<int:id>', methods=['POST'])
+    @app.route('/alunos/<int:id>', methods=['PUT'])
+    def update_aluno(id):
+        """
+        tags:
+          - Alunos
+        summary: Atualiza um aluno existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nome: { type: string }
+                  idade: { type: integer }
+                  turma_id: { type: integer }
+                  data_nascimento: { type: string, format: date }
+                  nota_primeiro_semestre: { type: number }
+                  nota_segundo_semestre: { type: number }
+                  media_final: { type: number }
+        responses:
+          200:
+            description: Aluno atualizado
+          404:
+            description: Aluno não encontrado
+        """
+        aluno = Aluno.query.get_or_404(id)
+        data = request.get_json()
+        aluno.nome = data['nome']
+        aluno.idade = int(data['idade'])
+        aluno.turma_id = int(data['turma_id'])
+        aluno.data_nascimento = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
+        aluno.nota_primeiro_semestre = float(data['nota_primeiro_semestre'])
+        aluno.nota_segundo_semestre = float(data['nota_segundo_semestre'])
+        aluno.media_final = float(data['media_final'])
+        db.session.commit()
+        return jsonify({'message': 'Aluno atualizado'})
+
+    @app.route('/alunos/<int:id>', methods=['DELETE'])
     def delete_aluno(id):
+        """
+        tags:
+          - Alunos
+        summary: Deleta um aluno existente
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        responses:
+          200:
+            description: Aluno deletado
+          404:
+            description: Aluno não encontrado
+        """
         aluno = Aluno.query.get_or_404(id)
         db.session.delete(aluno)
         db.session.commit()
-        flash("Aluno deletado!")
-        return redirect(url_for('alunos'))
+        return jsonify({'message': 'Aluno deletado'})
