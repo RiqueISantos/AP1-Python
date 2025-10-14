@@ -12,6 +12,8 @@ def setup_routes(app):
     @app.route('/professores', methods=['GET'])
     def list_professores():
         """
+        Lista os professores
+        ---
         tags:
           - Professores
         summary: Lista todos os professores
@@ -31,6 +33,8 @@ def setup_routes(app):
     @app.route('/professores', methods=['POST'])
     def create_professor():
         """
+        Cria um novo professor
+        ---
         tags:
           - Professores
         summary: Cria um novo professor
@@ -65,6 +69,8 @@ def setup_routes(app):
     @app.route('/professores/<int:id>', methods=['PUT'])
     def update_professor(id):
         """
+        Atualiza um professor existente
+        ---
         tags:
           - Professores
         summary: Atualiza um professor existente
@@ -103,6 +109,8 @@ def setup_routes(app):
     @app.route('/professores/<int:id>', methods=['DELETE'])
     def delete_professor(id):
         """
+        Deleta um professor existente
+        ---
         tags:
           - Professores
         summary: Deleta um professor existente
@@ -129,6 +137,8 @@ def setup_routes(app):
     @app.route('/turmas', methods=['GET'])
     def list_turmas():
         """
+        Lista todas as turmas
+        ---
         tags:
           - Turmas
         summary: Lista todas as turmas
@@ -147,6 +157,8 @@ def setup_routes(app):
     @app.route('/turmas', methods=['POST'])
     def create_turma():
         """
+        Cria uma nova turma
+        ---
         tags:
           - Turmas
         summary: Cria uma nova turma
@@ -179,6 +191,8 @@ def setup_routes(app):
     @app.route('/turmas/<int:id>', methods=['PUT'])
     def update_turma(id):
         """
+        Atualiza uma turma existente
+        ---
         tags:
           - Turmas
         summary: Atualiza uma turma existente
@@ -214,6 +228,8 @@ def setup_routes(app):
     @app.route('/turmas/<int:id>', methods=['DELETE'])
     def delete_turma(id):
         """
+        Deleta uma turma existente
+        ---
         tags:
           - Turmas
         summary: Deleta uma turma existente
@@ -239,6 +255,8 @@ def setup_routes(app):
     @app.route('/alunos', methods=['GET'])
     def list_alunos():
         """
+        Lista todos os alunos
+        ---
         tags:
           - Alunos
         summary: Lista todos os alunos
@@ -261,6 +279,8 @@ def setup_routes(app):
     @app.route('/alunos', methods=['POST'])
     def create_aluno():
         """
+        Cria um novo aluno
+        ---
         tags:
           - Alunos
         summary: Cria um novo aluno
@@ -301,6 +321,8 @@ def setup_routes(app):
     @app.route('/alunos/<int:id>', methods=['PUT'])
     def update_aluno(id):
         """
+        Atualiza um aluno existente
+        ---
         tags:
           - Alunos
         summary: Atualiza um aluno existente
@@ -344,6 +366,8 @@ def setup_routes(app):
     @app.route('/alunos/<int:id>', methods=['DELETE'])
     def delete_aluno(id):
         """
+        Deleta um aluno existente
+        ---
         tags:
           - Alunos
         summary: Deleta um aluno existente
