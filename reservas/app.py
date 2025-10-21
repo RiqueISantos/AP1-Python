@@ -1,27 +1,19 @@
 from flask import Flask
-from flask_restx import Api
-from config import Config
+from flasgger import Swagger
 from models.reserva_model import db
-from controller.routes import ns as reservas_ns
-import os
+from controller.routes import setup_routes  
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = 'projeto-API'
 
-    # Garante que a variável exista no config
-    app.config["GERENCIAMENTO_BASE_URL"] = os.environ.get("GERENCIAMENTO_BASE_URL", "http://localhost:5000")
+swagger = Swagger(app)
+db.init_app(app)
+setup_routes(app)
 
-    db.init_app(app)
-
-    api = Api(app, title="Reservas API", version="1.0", description="Serviço de Reservas")
-    api.add_namespace(reservas_ns, path="/api/reservas")
-
-    with app.app_context():
-        db.create_all()
-
-    return app
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
-    app = create_app()
     app.run(host="0.0.0.0", port=5000, debug=True)
