@@ -2,7 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource
 import requests
 from models import db, Reserva
-from schemas import reserva_model
+from models.schemas import reserva_model
 
 ns = Namespace("reservas", description="Operações de reservas")
 

@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restx import Api
 from config import Config
 from models import db
-from routes import ns as reservas_ns
+from controller.routes import ns as reservas_ns
 
 def create_app():
     app = Flask(__name__)
