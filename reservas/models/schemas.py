@@ -1,10 +1,9 @@
-from flask_restx import fields, Model
+from flask_restx import fields
 
 def reserva_model(ns):
-    return ns.model("Reserva", {
-        "id": fields.Integer(readonly=True),
-        "num_sala": fields.Integer(required=False, description="Número da sala"),
-        "lab": fields.Boolean(required=False, description="É laboratório?"),
-        "data": fields.String(required=True, description="Data em formato YYYY-MM-DD"),
-        "turma_id": fields.Integer(required=True, description="ID da turma (do serviço Gerenciamento)")
+    return ns.model('Reserva', {
+        'num_sala': fields.Integer(required=True, description="Número da sala"),
+        'lab': fields.Boolean(required=True, description="Se é laboratório"),
+        'data': fields.String(required=True, description="Data da reserva"),
+        'turma_id': fields.Integer(required=True, description="ID da turma")
     })

@@ -153,6 +153,38 @@ def setup_routes(app):
             'professor_id': t.professor_id,
             'ativo': t.ativo
         } for t in turmas])
+    
+    @app.route('/turmas/<int:id>', methods=['GET'])
+    def get_turma(id):
+      """
+      Busca uma turma pelo ID
+      ---
+      tags:
+        - Turmas
+      summary: Obtém uma turma específica pelo ID
+      parameters:
+        - name: id
+          in: path
+          type: integer
+          required: true
+          description: ID da turma
+      responses:
+        200:
+          description: Detalhes da turma
+        404:
+          description: Turma não encontrada
+      """
+      turma = Turma.query.get(id)
+      if not turma:
+        return jsonify({'mensagem': 'Turma não encontrada'}), 404
+
+      return jsonify({
+          'id': turma.id,
+          'descricao': turma.descricao,
+          'professor_id': turma.professor_id,
+          'ativo': turma.ativo
+      }), 200
+
 
     @app.route('/turmas', methods=['POST'])
     def create_turma():

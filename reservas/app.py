@@ -1,12 +1,16 @@
 from flask import Flask
 from flask_restx import Api
 from config import Config
-from models import db
+from models.reserva_model import db
 from controller.routes import ns as reservas_ns
+import os
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Garante que a variável exista no config
+    app.config["GERENCIAMENTO_BASE_URL"] = os.environ.get("GERENCIAMENTO_BASE_URL", "http://localhost:5000")
 
     db.init_app(app)
 
@@ -20,4 +24,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="0.0.0.0", port=5003, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

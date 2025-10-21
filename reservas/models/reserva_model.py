@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -7,9 +6,9 @@ class Reserva(db.Model):
     __tablename__ = "reservas"
 
     id = db.Column(db.Integer, primary_key=True)
-    num_sala = db.Column(db.Integer, nullable=True)
+    num_sala = db.Column(db.Integer, nullable=False)
     lab = db.Column(db.Boolean, default=False)
-    data = db.Column(db.String(10), nullable=False) 
+    data = db.Column(db.String(20), nullable=False)
     turma_id = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
