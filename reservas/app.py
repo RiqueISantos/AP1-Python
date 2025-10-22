@@ -2,8 +2,10 @@ from flask import Flask
 from flasgger import Swagger
 from models.reserva_model import db
 from controller.routes import setup_routes  
+from config import Config
 
 app = Flask(__name__)
+app.config.from_object(Config) 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'projeto-API'

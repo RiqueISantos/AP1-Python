@@ -1,5 +1,8 @@
-from flask import request, jsonify
+import os
+import requests
+from flask import request, jsonify, current_app
 from models.reserva_model import db, Reserva
+
 
 def setup_routes(app):
 
@@ -33,34 +36,65 @@ def setup_routes(app):
         ---
         tags:
           - Reservas
-        summary: Cria uma reserva com base no payload enviado
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  num_sala: { type: string }
-                  lab: { type: boolean }
-                  data: { type: string }
-                  turma_id: { type: integer }
+        summary: Cria uma nova reserva de sala/laboratório
+        parameters:
+          - in: body
+            name: body
+            required: true
+            schema:
+              type: object
+              required:
+                - num_sala
+                - data
+                - turma_id
+              properties:
+                num_sala:
+                  type: integer
+                  example: 101
+                lab:
+                  type: boolean
+                  example: true
+                data:
+                  type: string
+                  format: date
+                  example: "2025-10-22"
+                turma_id:
+                  type: integer
+                  example: 1
         responses:
           201:
             description: Reserva criada com sucesso
           400:
-            description: Dados inválidos
+            description: Turma não encontrada
+          502:
+            description: Erro ao consultar serviço de Gerenciamento
         """
-        data = request.get_json()
+
+        payload = request.json
+        turma_id = payload.get("turma_id")
+
+        base = request.environ.get(
+            "GERENCIAMENTO_BASE_URL") or current_app.config["GERENCIAMENTO_BASE_URL"]
+        try:
+            resp = requests.get(f"{base}/turmas/{turma_id}")
+        except requests.exceptions.RequestException:
+            return {"mensagem": "Erro ao se comunicar com o serviço de Gerenciamento"}, 502
+
+        if resp.status_code == 404:
+            return {"mensagem": f"Turma {turma_id} não encontrada no serviço de Gerenciamento"}, 400
+        if resp.status_code >= 400:
+            return {"mensagem": "Erro ao consultar serviço de Gerenciamento"}, 502
+
         r = Reserva(
-            num_sala=data.get('num_sala'),
-            lab=data.get('lab', False),
-            data=data['data'],
-            turma_id=data['turma_id']
+            num_sala=payload.get("num_sala"),
+            lab=payload.get("lab", False),
+            data=payload["data"],
+            turma_id=turma_id
         )
         db.session.add(r)
         db.session.commit()
-        return jsonify({'message': 'Reserva criada', 'id': r.id}), 201
+
+        return r.to_dict(), 201
 
     @app.route('/reservas/<int:id>', methods=['GET'])
     def get_reserva(id):
@@ -122,18 +156,38 @@ def setup_routes(app):
             description: Reserva atualizada com sucesso
           404:
             description: Reserva não encontrada
+          400:
+            description: Turma inexistente ou dados inválidos
         """
         r = Reserva.query.get(id)
         if not r:
             return jsonify({'mensagem': 'Reserva não encontrada'}), 404
 
         data = request.get_json()
+
+        turma_id = data.get('turma_id')
+        if turma_id:
+            base = request.environ.get(
+                "GERENCIAMENTO_BASE_URL") or current_app.config["GERENCIAMENTO_BASE_URL"]
+
+            try:
+                resp = requests.get(f"{base}/turmas/{turma_id}")
+            except requests.exceptions.RequestException:
+                return jsonify({"mensagem": "Erro ao se comunicar com o serviço de Gerenciamento"}), 502
+
+            if resp.status_code == 404:
+                return jsonify({"mensagem": f"Turma {turma_id} não encontrada no serviço de Gerenciamento"}), 400
+            elif resp.status_code >= 400:
+                return jsonify({"mensagem": "Erro ao consultar serviço de Gerenciamento"}), 502
+
+            r.turma_id = turma_id
+
         r.num_sala = data.get('num_sala', r.num_sala)
         r.lab = data.get('lab', r.lab)
         r.data = data.get('data', r.data)
-        r.turma_id = data.get('turma_id', r.turma_id)
+
         db.session.commit()
-        return jsonify({'message': 'Reserva atualizada'}), 200
+        return jsonify({'mensagem': 'Reserva atualizada com sucesso'}), 200
 
     @app.route('/reservas/<int:id>', methods=['DELETE'])
     def delete_reserva(id):
