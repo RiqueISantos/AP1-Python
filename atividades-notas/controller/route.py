@@ -98,3 +98,63 @@ def setup_routes(app):
         db.session.commit()
 
         return jsonify({'mensagem': 'Atividade atualizada com sucesso!'}), 200
+    
+    @app.route('/atividades/<int:id>', methods=['DELETE'])
+    def delete_atividade(id):
+
+        atv = Atividades.query.get(id)
+
+        if not atv:
+            return jsonify({'erro': 'Nenhuma atividade encontrada!'}), 400
+        
+        db.session.delete(atv)
+        db.session.commit()
+
+        return jsonify({'mensagem': 'Atividade deletada com sucesso!'}), 200
+    
+
+    # CRUD NOTAS
+
+    @app.route('/notas', methods=['GET'])
+    def get_notas():
+
+        notas = Notas.query.all()
+        if not notas:
+            return jsonify({'erro': 'Nenhuma nota encontrada no sistema.'}), 400
+        
+        return jsonify([{
+            'id': nota.id,
+            'nota': nota.nota,
+            'aluno_id': nota.aluno_id,
+            'atividade_id': nota.atividade_id
+        } for nota in notas]), 200
+    
+    @app.route('/notas/<int:id>', methods=['GET'])
+    def get_nota(id):
+
+        nota = Notas.query.get(id)
+        if not nota:
+            return jsonify({'erro': 'Nenhuma nota encontrada.'}), 400
+        
+        return jsonify({
+            'id': nota.id,
+            'nota': nota.nota,
+            'aluno_id': nota.aluno_id,
+            'atividade_id': nota.atividade_id
+        }), 200
+    
+    @app.route('/notas', methods=['POST'])
+    def create_nota():
+
+        dados = request.get_json()
+
+        nota = Notas(
+            nota=float(dados['nota']),
+            aluno_id=int(dados['aluno_id']),
+            atividade_id=int(dados['atividade_id'])
+        )
+
+        db.session.add(nota)
+        db.session.commit()
+
+        return jsonify({'mensagem': 'Nota cadastrada com sucesso!'}), 201
