@@ -120,7 +120,7 @@ def setup_routes(app):
 
         notas = Notas.query.all()
         if not notas:
-            return jsonify({'erro': 'Nenhuma nota encontrada no sistema.'}), 400
+            return jsonify({'erro': 'Nenhuma nota encontrada no sistema.'}), 404
         
         return jsonify([{
             'id': nota.id,
@@ -134,7 +134,7 @@ def setup_routes(app):
 
         nota = Notas.query.get(id)
         if not nota:
-            return jsonify({'erro': 'Nenhuma nota encontrada.'}), 400
+            return jsonify({'erro': 'Nenhuma nota encontrada.'}), 404
         
         return jsonify({
             'id': nota.id,
@@ -158,3 +158,34 @@ def setup_routes(app):
         db.session.commit()
 
         return jsonify({'mensagem': 'Nota cadastrada com sucesso!'}), 201
+    
+    @app.route('/notas/<int:id>', methods=['PUT'])
+    def update_nota(id):
+
+        nota = Notas.query.get(id)
+
+        if not nota:
+            return jsonify({'erro': 'Nota não encontrada!'}), 404
+        
+        dados = request.get_json()
+
+        nota.nota = float(dados['nota'])
+        nota.aluno_id = int(dados['aluno_id'])
+        nota.professor_id = int(dados['professor_id'])
+
+        db.session.commit()
+
+        return jsonify({'mensagem': 'Nota atualizada com sucesso!'}), 200
+    
+    @app.route('/notas/<int:id>', methods=['DELETE'])
+    def delete_nota(id):
+
+        nota = Notas.query.get(id)
+
+        if not nota:
+            return jsonify({'erro': 'Nota não encontrada no sistema!'}), 404
+        
+        db.session.delete(nota)
+        db.session.commit()
+
+        return jsonify({'mensagem': 'Nota deletada com sucesso!'}), 200
