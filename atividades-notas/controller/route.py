@@ -171,7 +171,7 @@ def setup_routes(app):
 
         nota.nota = float(dados['nota'])
         nota.aluno_id = int(dados['aluno_id'])
-        nota.professor_id = int(dados['professor_id'])
+        nota.atividade_id = int(dados['atividade_id'])
 
         db.session.commit()
 
