@@ -15,11 +15,13 @@ def setup_routes(app):
         Lista todas as atividades
         ---
         tags:
-          - Atividades
+          - atividades
         summary: Lista todas as atividades cadastradas
         responses:
-          200:
-            description: Lista de atividades
+            200:
+                description: Lista de atividades
+            400:
+                description: Nenhuma atividade cadastrada
         """
 
         atividades = Atividades.query.all()
@@ -43,12 +45,13 @@ def setup_routes(app):
         Obtém uma atividade pelo ID
         ---
         tags:
-          - Atividades
+          - atividades
         summary: Recupera uma atividade específica
         parameters:
           - in: path
             name: id
-            schema: { type: integer }
+            schema:
+              type: integer
             required: true
             description: ID da atividade
         responses:
@@ -61,7 +64,7 @@ def setup_routes(app):
         atv = Atividades.query.get(id)
 
         if not atv:
-            return jsonify({'mensagem': 'Atividade não encontrada!'}) , 400
+            return jsonify({'mensagem': 'Atividade não encontrada!'}) , 404
         
         return jsonify({
             'id': atv.id,
@@ -77,49 +80,48 @@ def setup_routes(app):
     def create_atividade():
         """
         Cria uma nova atividade
-        -----------------------
-
+        ---
         tags:
-            - Atividades
+          - atividades
         summary: Registra uma nova atividade no sistema
         parameters:
-            - in: body
+          - in: body
             name: body
             required: true
             schema:
-                type: object
-                required:
-                    - nome_atividade
-                    - descricao
-                    - peso_porcento
-                    - data_entrega
-                    - turma_id
-                    - professor_id
-                properties:
-                    nome_atividade:
-                        type: string
-                        example: "Prova de História"
-                    descricao:
-                        type: string
-                        example: "Avaliação sobre a Revolução Francesa"
-                    peso_porcento:
-                        type: number
-                        example: 25
-                    data_entrega:
-                        type: string
-                        format: date
-                        example: "2025-11-05"
-                    turma_id:
-                        type: integer
-                        example: 2
-                    professor_id:
-                        type: integer
-                        example: 5
+              type: object
+              required:
+                - nome_atividade
+                - descricao
+                - peso_porcento
+                - data_entrega
+                - turma_id
+                - professor_id
+              properties:
+                nome_atividade:
+                  type: string
+                  example: "Prova de História"
+                descricao:
+                  type: string
+                  example: "Avaliação sobre a Revolução Francesa"
+                peso_porcento:
+                  type: number
+                  example: 25
+                data_entrega:
+                  type: string
+                  format: date
+                  example: "2025-11-05"
+                turma_id:
+                  type: integer
+                  example: 2
+                professor_id:
+                  type: integer
+                  example: 5
         responses:
             201:
-                description: Atividade criada com sucesso
+              description: Atividade criada com sucesso
             400:
-                description: Formato de data inválido
+              description: Formato de data inválido
         """
 
         dados = request.get_json()
@@ -147,57 +149,57 @@ def setup_routes(app):
     def update_atividade(id):
         """
         Atualiza uma atividade existente
-        --------------------------------
-
+        ---
         tags:
-            - Atividades
+            - atividades
         summary: Atualiza os dados de uma atividade cadastrada
         parameters:
-            - in: path
+          - in: path
             name: id
             required: true
-                type: integer
-                description: ID da atividade que será atualizada
+            schema:
+              type: integer
+            description: ID da atividade que será atualizada
             example: 1
-            - in: body
+          - in: body
             name: body
             required: true
-                schema:
-                type: object
-                required:
-                    - nome_atividade
-                    - descricao
-                    - peso_porcento
-                    - data_entrega
-                    - turma_id
-                    - professor_id
-                properties:
-                    nome_atividade:
-                        type: string
-                        example: "Prova de Matemática - Revisão"
-                    descricao:
-                        type: string
-                        example: "Revisão de conteúdos para a avaliação final"
-                    peso_porcento:
-                        type: number
-                        example: 30
-                    data_entrega:
-                        type: string
-                        format: date
-                        example: "2025-11-20"
-                    turma_id:
-                        type: integer
-                        example: 3
-                    professor_id:
-                        type: integer
-                        example: 1
+            schema:
+              type: object
+              required:
+                - nome_atividade
+                - descricao
+                - peso_porcento
+                - data_entrega
+                - turma_id
+                - professor_id
+              properties:
+                nome_atividade:
+                    type: string
+                    example: "Prova de Matemática - Revisão"
+                descricao:
+                    type: string
+                    example: "Revisão de conteúdos para a avaliação final"
+                peso_porcento:
+                    type: number
+                    example: 30
+                data_entrega:
+                    type: string
+                    format: date
+                    example: "2025-11-20"
+                turma_id:
+                    type: integer
+                    example: 3
+                professor_id:
+                    type: integer
+                    example: 1
         responses:
             200:
-                description: Atividade atualizada com sucesso
+              description: Atividade atualizada com sucesso
             400:
-                description: Formato de data inválido
+              description: Formato de data inválido
             404:
-                description: Atividade não encontrada
+              description: Atividade não encontrada
         """
 
 
@@ -230,12 +232,13 @@ def setup_routes(app):
         Deleta uma Atividade existente
         ---
         tags:
-          - Atividades
+          - atividades
         summary: Remove uma Atividade do banco de dados
         parameters:
           - in: path
             name: id
-            schema: { type: integer }
+            schema: 
+              type: integer
             required: true
         responses:
           200:
@@ -263,12 +266,12 @@ def setup_routes(app):
         Lista todas as notas
         ---
         tags:
-          - Notas
+          - notas
         summary: Lista todas as notas cadastradas
         responses:
           200:
             description: Lista de notas
-        404:
+          404:
             description: Nenhuma nota encontrada.
         """
 
@@ -289,12 +292,13 @@ def setup_routes(app):
         Obtém uma Nota pelo ID
         ---
         tags:
-          - Notas
+          - notas
         summary: Recupera uma Nota específica
         parameters:
           - in: path
             name: id
-            schema: { type: integer }
+            schema: 
+              type: integer
             required: true
             description: ID da Nota
         responses:
@@ -319,34 +323,33 @@ def setup_routes(app):
     def create_nota():
         """
         Cria uma nova Nota
-        -----------------------
-
+        ---
         tags:
-            - Notas
+          - notas
         summary: Registra uma nova Nota no sistema
         parameters:
-            - in: body
+          - in: body
             name: body
             required: true
             schema:
-                type: object
-                required:
-                    - nota
-                    - aluno_id
-                    - atividade_id
-                properties:
-                    nota:
-                        type: float
-                        example: 7.5
-                    aluno_id:
-                        type: integer
-                        example: 2
-                    atividade_id:
-                        type: integer
-                        example: 5
+              type: object
+              required:
+                - nota
+                - aluno_id
+                - atividade_id
+            properties:
+              nota:
+                type: float
+                example: 7.5
+              aluno_id:
+                type: integer
+                example: 2
+              atividade_id:
+                type: integer
+                example: 5
         responses:
             201:
-                description: Nota criada com sucesso
+              description: Nota criada com sucesso
         """
 
         dados = request.get_json()
@@ -365,43 +368,43 @@ def setup_routes(app):
     @app.route('/notas/<int:id>', methods=['PUT'])
     def update_nota(id):
         """
-        Atualiza uma atividade existente
-        --------------------------------
-
+        Atualiza uma nota existente
+        ---
         tags:
-            - Atividades
-        summary: Atualiza os dados de uma atividade cadastrada
+          - notas
+        summary: Atualiza os dados de uma nota cadastrada
         parameters:
-            - in: path
+          - in: path
             name: id
             required: true
-                type: integer
-                description: ID da atividade que será atualizada
+            schema:
+              type: integer
+            description: ID da nota que será atualizada
             example: 1
-            - in: body
+          - in: body
             name: body
             required: true
-                schema:
-                type: object
-                required:
-                    - nota
-                    - aluno_id
-                    - atividade_id
-                properties:
-                    nota:
-                        type: integer
-                        example: 7.5
-                    aluno_id:
-                        type: integer
-                        example: 3
-                    atividade_id:
-                        type: integer
-                        example: 1
+            schema:
+              type: object
+              required:
+                - nota
+                - aluno_id
+                - atividade_id
+              properties:
+                nota:
+                  type: number
+                  example: 7.5
+                aluno_id:
+                  type: integer
+                  example: 3
+                atividade_id:
+                  type: integer
+                  example: 1
         responses:
             200:
-                description: Nota atualizada com sucesso
+              description: Nota atualizada com sucesso
             404:
-                description: Nota não encontrada
+              description: Nota não encontrada
         """
 
         nota = Notas.query.get(id)
@@ -425,12 +428,13 @@ def setup_routes(app):
         Deleta uma Nota existente
         ---
         tags:
-          - Notas
+          - notas
         summary: Remove uma Nota do banco de dados
         parameters:
           - in: path
             name: id
-            schema: { type: integer }
+            schema:
+              type: integer
             required: true
         responses:
           200:
