@@ -11,7 +11,16 @@ def setup_routes(app):
 
     @app.route('/atividades', methods=['GET'])
     def listar_atividades():
-        """"""
+        """
+        Lista todas as atividades
+        ---
+        tags:
+          - Atividades
+        summary: Lista todas as atividades cadastradas
+        responses:
+          200:
+            description: Lista de atividades
+        """
 
         atividades = Atividades.query.all()
 
@@ -30,7 +39,24 @@ def setup_routes(app):
     
     @app.route('/atividades/<int:id>', methods=['GET'])
     def get_atividade(id):
-        """"""
+        """
+        Obtém uma atividade pelo ID
+        ---
+        tags:
+          - Atividades
+        summary: Recupera uma atividade específica
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+            description: ID da atividade
+        responses:
+          200:
+            description: Atividade encontrada
+          404:
+            description: Atividade não encontrada
+        """
 
         atv = Atividades.query.get(id)
 
@@ -49,7 +75,52 @@ def setup_routes(app):
     
     @app.route('/atividades', methods=['POST'])
     def create_atividade():
-        """"""
+        """
+        Cria uma nova atividade
+        -----------------------
+
+        tags:
+            - Atividades
+        summary: Registra uma nova atividade no sistema
+        parameters:
+            - in: body
+            name: body
+            required: true
+            schema:
+                type: object
+                required:
+                    - nome_atividade
+                    - descricao
+                    - peso_porcento
+                    - data_entrega
+                    - turma_id
+                    - professor_id
+                properties:
+                    nome_atividade:
+                        type: string
+                        example: "Prova de História"
+                    descricao:
+                        type: string
+                        example: "Avaliação sobre a Revolução Francesa"
+                    peso_porcento:
+                        type: number
+                        example: 25
+                    data_entrega:
+                        type: string
+                        format: date
+                        example: "2025-11-05"
+                    turma_id:
+                        type: integer
+                        example: 2
+                    professor_id:
+                        type: integer
+                        example: 5
+        responses:
+            201:
+                description: Atividade criada com sucesso
+            400:
+                description: Formato de data inválido
+        """
 
         dados = request.get_json()
 
@@ -74,7 +145,61 @@ def setup_routes(app):
     
     @app.route('/atividades/<int:id>', methods=['PUT'])
     def update_atividade(id):
-        """"""
+        """
+        Atualiza uma atividade existente
+        --------------------------------
+
+        tags:
+            - Atividades
+        summary: Atualiza os dados de uma atividade cadastrada
+        parameters:
+            - in: path
+            name: id
+            required: true
+                type: integer
+                description: ID da atividade que será atualizada
+            example: 1
+            - in: body
+            name: body
+            required: true
+                schema:
+                type: object
+                required:
+                    - nome_atividade
+                    - descricao
+                    - peso_porcento
+                    - data_entrega
+                    - turma_id
+                    - professor_id
+                properties:
+                    nome_atividade:
+                        type: string
+                        example: "Prova de Matemática - Revisão"
+                    descricao:
+                        type: string
+                        example: "Revisão de conteúdos para a avaliação final"
+                    peso_porcento:
+                        type: number
+                        example: 30
+                    data_entrega:
+                        type: string
+                        format: date
+                        example: "2025-11-20"
+                    turma_id:
+                        type: integer
+                        example: 3
+                    professor_id:
+                        type: integer
+                        example: 1
+        responses:
+            200:
+                description: Atividade atualizada com sucesso
+            400:
+                description: Formato de data inválido
+            404:
+                description: Atividade não encontrada
+        """
+
 
         atv = Atividades.query.get(id)
 
@@ -101,11 +226,28 @@ def setup_routes(app):
     
     @app.route('/atividades/<int:id>', methods=['DELETE'])
     def delete_atividade(id):
+        """
+        Deleta uma Atividade existente
+        ---
+        tags:
+          - Atividades
+        summary: Remove uma Atividade do banco de dados
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        responses:
+          200:
+            description: Atividade deletada com sucesso
+          404:
+            description: Atividade não encontrada
+        """
 
         atv = Atividades.query.get(id)
 
         if not atv:
-            return jsonify({'erro': 'Nenhuma atividade encontrada!'}), 400
+            return jsonify({'erro': 'Nenhuma atividade encontrada!'}), 404
         
         db.session.delete(atv)
         db.session.commit()
@@ -117,6 +259,18 @@ def setup_routes(app):
 
     @app.route('/notas', methods=['GET'])
     def get_notas():
+        """
+        Lista todas as notas
+        ---
+        tags:
+          - Notas
+        summary: Lista todas as notas cadastradas
+        responses:
+          200:
+            description: Lista de notas
+        404:
+            description: Nenhuma nota encontrada.
+        """
 
         notas = Notas.query.all()
         if not notas:
@@ -131,6 +285,24 @@ def setup_routes(app):
     
     @app.route('/notas/<int:id>', methods=['GET'])
     def get_nota(id):
+        """
+        Obtém uma Nota pelo ID
+        ---
+        tags:
+          - Notas
+        summary: Recupera uma Nota específica
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+            description: ID da Nota
+        responses:
+          200:
+            description: Nota encontrada
+          404:
+            description: Nota não encontrada
+        """
 
         nota = Notas.query.get(id)
         if not nota:
@@ -145,6 +317,37 @@ def setup_routes(app):
     
     @app.route('/notas', methods=['POST'])
     def create_nota():
+        """
+        Cria uma nova Nota
+        -----------------------
+
+        tags:
+            - Notas
+        summary: Registra uma nova Nota no sistema
+        parameters:
+            - in: body
+            name: body
+            required: true
+            schema:
+                type: object
+                required:
+                    - nota
+                    - aluno_id
+                    - atividade_id
+                properties:
+                    nota:
+                        type: float
+                        example: 7.5
+                    aluno_id:
+                        type: integer
+                        example: 2
+                    atividade_id:
+                        type: integer
+                        example: 5
+        responses:
+            201:
+                description: Nota criada com sucesso
+        """
 
         dados = request.get_json()
 
@@ -161,6 +364,45 @@ def setup_routes(app):
     
     @app.route('/notas/<int:id>', methods=['PUT'])
     def update_nota(id):
+        """
+        Atualiza uma atividade existente
+        --------------------------------
+
+        tags:
+            - Atividades
+        summary: Atualiza os dados de uma atividade cadastrada
+        parameters:
+            - in: path
+            name: id
+            required: true
+                type: integer
+                description: ID da atividade que será atualizada
+            example: 1
+            - in: body
+            name: body
+            required: true
+                schema:
+                type: object
+                required:
+                    - nota
+                    - aluno_id
+                    - atividade_id
+                properties:
+                    nota:
+                        type: integer
+                        example: 7.5
+                    aluno_id:
+                        type: integer
+                        example: 3
+                    atividade_id:
+                        type: integer
+                        example: 1
+        responses:
+            200:
+                description: Nota atualizada com sucesso
+            404:
+                description: Nota não encontrada
+        """
 
         nota = Notas.query.get(id)
 
@@ -179,6 +421,23 @@ def setup_routes(app):
     
     @app.route('/notas/<int:id>', methods=['DELETE'])
     def delete_nota(id):
+        """
+        Deleta uma Nota existente
+        ---
+        tags:
+          - Notas
+        summary: Remove uma Nota do banco de dados
+        parameters:
+          - in: path
+            name: id
+            schema: { type: integer }
+            required: true
+        responses:
+          200:
+            description: Nota deletada com sucesso
+          404:
+            description: Nota não encontrada
+        """
 
         nota = Notas.query.get(id)
 

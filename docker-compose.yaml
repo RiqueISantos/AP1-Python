@@ -30,3 +30,18 @@ services:
       - GERENCIAMENTO_BASE_URL=http://gerenciamento:5000
     command: python app.py
 
+  atividades-notas:
+    build:
+      context: ./atividades-notas
+    container_name: atividades-notas
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./atividades-notas:/app
+      - ./atividades-notas/database.db:/app/database.db
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - GERENCIAMENTO_BASE_URL=http://gerenciamento:5000
+    command: python app.py
+
