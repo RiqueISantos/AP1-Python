@@ -30,6 +30,40 @@ def setup_routes(app):
             'observacoes': p.observacoes
         } for p in professores])
 
+    @app.route('/professores/<int:id>', methods=['GET'])
+    def get_professor(id):
+        """
+        Obtém um Professor pelo ID
+        ---
+        tags:
+          - professor
+        summary: Recupera um professor específico
+        parameters:
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
+            description: ID da professor
+        responses:
+          200:
+            description: Professor encontrado
+          404:
+            description: Professor não encontrado
+        """
+
+        prof = Professor.query.get(id)
+        if not prof:
+            return jsonify({'erro': 'Professor não encontrado.'}), 404
+        
+        return jsonify({
+            'id': prof.id,
+            'nome': prof.nome,
+            'idade': prof.idade,
+            'materia': prof.materia,
+            'observacoes': prof.observacoes
+            }), 200
+    
     @app.route('/professores', methods=['POST'])
     def create_professor():
         """
@@ -307,6 +341,25 @@ def setup_routes(app):
             'nota_segundo_semestre': a.nota_segundo_semestre,
             'media_final': a.media_final
         } for a in alunos])
+
+    @app.route('/alunos/<int:id>', methods=['GET'])
+    def get_aluno(id):
+        
+        
+        aluno = Aluno.query.get(id)
+        if not aluno:
+            return jsonify({'erro': 'Aluno não encontrado!'}), 404
+        
+        return jsonify({
+            'id': aluno.id,
+            'nome': aluno.nome,
+            'idade': aluno.idade,
+            'turma_id': aluno.turma_id,
+            'data_nascimento': aluno.data_nascimento.isoformat(),
+            'nota_primeiro_semestre': aluno.nota_primeiro_semestre,
+            'nota_segundo_semestre': aluno.nota_segundo_semestre,
+            'media_final': aluno.media_final
+        })
 
     @app.route('/alunos', methods=['POST'])
     def create_aluno():

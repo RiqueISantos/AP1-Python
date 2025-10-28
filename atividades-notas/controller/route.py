@@ -237,7 +237,7 @@ def setup_routes(app):
             return jsonify({'erro': 'Atividade não encontrada!'}), 404
         
         dados = request.get_json()
-        base = current_app.config['GERENCIAMENT_BASE_URL']
+        base = current_app.config['GERENCIAMENTO_BASE_URL']
         
         try:
             turma_id = int(dados['turma_id'])
@@ -413,8 +413,9 @@ def setup_routes(app):
 
         try:
             aluno_id = int(dados['aluno_id'])
+            atividade_id = int(dados['atividade_id'])
         except (KeyError, TypeError, ValueError):
-            return jsonify({'erro': 'O ID do aluno é obrigatório e deve ser um número inteiro.'}), 400
+            return jsonify({'erro': 'O ID do aluno e da atividade são obrigatórios e deves ser um número inteiro.'}), 400
         
         try:
             resp = requests.get(f'{base}/alunos/{aluno_id}')
@@ -431,14 +432,14 @@ def setup_routes(app):
         except ValueError:
             return jsonify({'erro': 'Nota inválida! Digite um número decimal.'}), 400
         
-        atividade_id = Atividades.query.get(int(dados['atividade_id']))
-        if not atividade_id:
-            return jsonify({'erro:' f'Atividade com o ID {atividade_id} não foi encontrada.'}), 404
+        atividade = Atividades.query.get(atividade_id)
+        if not atividade:
+            return jsonify({'erro': f'Atividade com o ID {atividade_id} não foi encontrada.'}), 404
 
         nota = Notas(
             nota=nota,
             aluno_id=aluno_id,
-            atividade_id=atividade_id
+            atividade_id=atividade.id
         )
 
         db.session.add(nota)
@@ -498,8 +499,9 @@ def setup_routes(app):
 
         try:
             aluno_id = int(dados['aluno_id'])
+            atividade_id = int(dados['atividade_id'])
         except ValueError:
-            return jsonify({'erro': 'O ID do aluno é obrigatório e deve ser um número inteiro.'}), 400
+            return jsonify({'erro': 'O ID do aluno e da atividade são obrigatórios e devem ser um número inteiro.'}), 400
         
         try:
             resp = requests.get(f'{base}/alunos/{aluno_id}')
@@ -511,18 +513,18 @@ def setup_routes(app):
         elif resp.status_code != 200:
             return jsonify({'erro': 'Erro de comunicação com o microsserviço de Gerenciamento.'}), 502
         
-        atividade_id = Atividades.query.get(int(dados['atividade_id']))
+        atividade = Atividades.query.get(atividade_id)
         if not atividade_id:
             return jsonify({'erro': f'Atividade com o ID {atividade_id} não foi encontrada.'}), 404
         
         try:
-            nota = float(dados['nota'])
+            nova_nota = float(dados['nota'])
         except ValueError:
             return jsonify({'erro': 'A nota do aluno deve ser um número decimal válido.'}), 400
 
-        nota.nota = nota
+        nota.nota = nova_nota
         nota.aluno_id = aluno_id
-        nota.atividade_id = atividade_id
+        nota.atividade_id = atividade.id
 
         db.session.commit()
 
