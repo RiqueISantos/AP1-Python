@@ -143,12 +143,12 @@ def setup_routes(app):
         if resp_turma.status_code == 404:
             return jsonify({'erro': f'Turma com id {turma_id} não encontrada.'}), 404
         elif resp_turma.status_code != 200:
-            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502
+            return jsonify({'erro': f'Falha de comunicação com o microsserviço de Gerenciamento. {resp_turma.status_code}'}), 502
         
         if resp_professor.status_code == 404:
             return jsonify({'erro': f'Professor com id {professor_id} não encontrado.'}), 404
         elif resp_professor.status_code != 200:
-            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502  
+            return jsonify({'erro': f'Falha de comunicação com o microsserviço de Gerenciamento. {resp_professor.status_code}'}), 502  
 
         try:
             data_entrega = datetime.strptime(dados['data_entrega'], '%Y-%m-%d').date()
