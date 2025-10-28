@@ -1,4 +1,5 @@
-from flask import request, jsonify
+import requests
+from flask import request, jsonify, current_app
 from models.database import db
 from models.atividades_model import Atividades
 from models.notas_model import Notas
@@ -123,21 +124,49 @@ def setup_routes(app):
             400:
               description: Formato de data inválido
         """
-
+        
+        base = current_app.config["GERENCIAMENTO_BASE_URL"]
         dados = request.get_json()
+
+        try:
+            turma_id = int(dados['turma_id'])
+            professor_id = int(dados['professor_id'])
+        except (KeyError, ValueError, TypeError):
+            return jsonify({'erro': 'O ID de Turma e Professor são obrigatórios e devem ser números inteiros.'}), 400
+
+        try:
+            resp_turma = requests.get(f"{base}/turmas/{turma_id}")
+            resp_professor = requests.get(f"{base}/professores/{professor_id}")
+        except requests.exceptions.RequestException:
+            return jsonify({'erro': 'erro de comunicação com o microsserviço Gerenciamento.'}), 502
+        
+        if resp_turma.status_code == 404:
+            return jsonify({'erro': f'Turma com id {turma_id} não encontrada.'}), 404
+        elif resp_turma.status_code != 200:
+            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        if resp_professor.status_code == 404:
+            return jsonify({'erro': f'Professor com id {professor_id} não encontrado.'}), 404
+        elif resp_professor.status_code != 200:
+            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502  
 
         try:
             data_entrega = datetime.strptime(dados['data_entrega'], '%Y-%m-%d').date()
         except ValueError:
             return jsonify({'erro': 'Formato de data inválido! Digite no seguinte formato: AAAA-MM-DD. Exemplo: 2025-10-25'}), 400
+        
+        try:
+            peso_porcento = float(dados['peso_porcento'])
+        except ValueError:
+            return jsonify({'erro': 'O percentual do peso da nota deve ser um número decimal!'}), 400
 
         atv = Atividades(
             nome_atividade=dados['nome_atividade'],
             descricao=dados['descricao'],
-            peso_porcento=float(dados['peso_porcento']),
+            peso_porcento=peso_porcento,
             data_entrega=data_entrega,
-            turma_id=int(dados['turma_id']),
-            professor_id=int(dados['professor_id'])
+            turma_id=turma_id,
+            professor_id=professor_id
         )
 
         db.session.add(atv)
@@ -202,25 +231,52 @@ def setup_routes(app):
               description: Atividade não encontrada
         """
 
-
         atv = Atividades.query.get(id)
 
         if not atv:
             return jsonify({'erro': 'Atividade não encontrada!'}), 404
         
         dados = request.get_json()
+        base = current_app.config['GERENCIAMENT_BASE_URL']
+        
+        try:
+            turma_id = int(dados['turma_id'])
+            professor_id = int(dados['professor_id'])
+        except (KeyError, ValueError, TypeError):
+            return jsonify({'erro': 'O ID de Turma e Professor são obrigatórios e devem ser números inteiros.'}), 400
+
+        try:
+            resp_turma = requests.get(f"{base}/turmas/{turma_id}")
+            resp_professor = requests.get(f"{base}/professores/{professor_id}")
+        except requests.exceptions.RequestException:
+            return jsonify({'mensagem': 'erro de comunicação com o microsserviço Gerenciamento.'}), 502
+        
+        if resp_turma.status_code == 404:
+            return jsonify({'erro': f'Turma com id {turma_id} não encontrada.'}), 404
+        elif resp_turma.status_code != 200:
+            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        if resp_professor.status_code == 404:
+            return jsonify({'erro': f'Professor com id {professor_id} não encontrado.'}), 404
+        elif resp_professor.status_code != 200:
+            return jsonify({'erro': 'Falha de comunicação com o microsserviço de Gerenciamento.'}), 502  
 
         try:
             data_entrega = datetime.strptime(dados['data_entrega'], '%Y-%m-%d').date()
         except ValueError:
             return jsonify({'erro': 'Formato de data inválido! Digite no seguinte formato: AAAA-MM-DD. Exemplo: 2025-10-25'}), 400
+        
+        try:
+            peso_porcento = float(dados['peso_porcento'])
+        except ValueError:
+            return jsonify({'erro': 'O percentual do peso da nota deve ser um número decimal!'}), 400
 
         atv.nome_atividade = dados['nome_atividade']
         atv.descricao = dados['descricao']
-        atv.peso_porcento = float(dados['peso_porcento'])
+        atv.peso_porcento = peso_porcento
         atv.data_entrega = data_entrega
-        atv.turma_id = dados['turma_id']
-        atv.professor_id = dados['professor_id']
+        atv.turma_id = turma_id
+        atv.professor_id = professor_id
 
         db.session.commit()
 
@@ -353,11 +409,36 @@ def setup_routes(app):
         """
 
         dados = request.get_json()
+        base = current_app.config['GERENCIAMENTO_BASE_URL']
+
+        try:
+            aluno_id = int(dados['aluno_id'])
+        except (KeyError, TypeError, ValueError):
+            return jsonify({'erro': 'O ID do aluno é obrigatório e deve ser um número inteiro.'}), 400
+        
+        try:
+            resp = requests.get(f'{base}/alunos/{aluno_id}')
+        except requests.exceptions.RequestException:
+            return jsonify({'erro': 'Erro de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        if resp.status_code == 404:
+            return jsonify({'erro': f'Aluno com ID {aluno_id} não foi encontrado.'}), 404
+        elif resp.status_code != 200:
+            return jsonify({'erro': 'Erro de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        try:
+            nota = float(dados['nota'])
+        except ValueError:
+            return jsonify({'erro': 'Nota inválida! Digite um número decimal.'}), 400
+        
+        atividade_id = Atividades.query.get(int(dados['atividade_id']))
+        if not atividade_id:
+            return jsonify({'erro:' f'Atividade com o ID {atividade_id} não foi encontrada.'}), 404
 
         nota = Notas(
-            nota=float(dados['nota']),
-            aluno_id=int(dados['aluno_id']),
-            atividade_id=int(dados['atividade_id'])
+            nota=nota,
+            aluno_id=aluno_id,
+            atividade_id=atividade_id
         )
 
         db.session.add(nota)
@@ -407,6 +488,7 @@ def setup_routes(app):
               description: Nota não encontrada
         """
 
+        base = current_app.config['GERENCIAMENTO_BASE_URL']
         nota = Notas.query.get(id)
 
         if not nota:
@@ -414,9 +496,33 @@ def setup_routes(app):
         
         dados = request.get_json()
 
-        nota.nota = float(dados['nota'])
-        nota.aluno_id = int(dados['aluno_id'])
-        nota.atividade_id = int(dados['atividade_id'])
+        try:
+            aluno_id = int(dados['aluno_id'])
+        except ValueError:
+            return jsonify({'erro': 'O ID do aluno é obrigatório e deve ser um número inteiro.'}), 400
+        
+        try:
+            resp = requests.get(f'{base}/alunos/{aluno_id}')
+        except requests.exceptions.RequestException:
+            return jsonify({'erro': 'Erro de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        if resp.status_code == 404:
+            return jsonify({'erro': f'Aluno com ID {aluno_id} não foi encontrado.'}), 404
+        elif resp.status_code != 200:
+            return jsonify({'erro': 'Erro de comunicação com o microsserviço de Gerenciamento.'}), 502
+        
+        atividade_id = Atividades.query.get(int(dados['atividade_id']))
+        if not atividade_id:
+            return jsonify({'erro': f'Atividade com o ID {atividade_id} não foi encontrada.'}), 404
+        
+        try:
+            nota = float(dados['nota'])
+        except ValueError:
+            return jsonify({'erro': 'A nota do aluno deve ser um número decimal válido.'}), 400
+
+        nota.nota = nota
+        nota.aluno_id = aluno_id
+        nota.atividade_id = atividade_id
 
         db.session.commit()
 

@@ -2,8 +2,10 @@ from flask import Flask
 from flasgger import Swagger
 from models.database import db
 from controller.route import setup_routes
+import os
 
 app = Flask(__name__)
+app.config["GERENCIAMENTO_BASE_URL"] = os.getenv("GERENCIAMENTO_BASE_URL")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///atividades_notas.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'projeto-API'
