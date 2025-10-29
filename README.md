@@ -1,89 +1,169 @@
-# 📚 Escola API
+# 🏫 Sistema de Gestão Escolar - Microsserviços
 
-Este projeto é uma API de microsserviços para cadastro e gerenciamento de **alunos**, **turmas** e **professores**. A aplicação foi desenvolvida em Python utilizando Flask, Flask-SQLAlchemy e Flasgger para documentação automática das rotas. O ambiente é facilmente executável via Docker.
+Este projeto consiste em um sistema de gestão escolar baseado em **arquitetura de microsserviços**, desenvolvido em **Python com Flask**.  
+O sistema permite o **cadastro e gerenciamento de alunos, turmas, professores, reservas de salas/laboratórios e controle de atividades/notas**.
 
-## 🚀 Funcionalidades
+---
 
-- Cadastro, listagem, atualização e remoção de **alunos**
-- Cadastro, listagem, atualização e remoção de **professores**
-- Cadastro, listagem, atualização e remoção de **turmas**
-- Relacionamento entre alunos, turmas e professores
-- Documentação automática das rotas via Swagger (Flasgger)
+## 📚 Sumário
+- [Visão Geral](#visão-geral)
+- [Microsserviços](#microsserviços)
+- [Arquitetura](#arquitetura)
+- [Como Executar](#como-executar)
+- [Rotas Principais](#rotas-principais)
+- [Exemplo de Uso](#exemplo-de-uso)
+- [Documentação Swagger](#documentação-swagger)
+- [Dependências](#dependências)
+- [Observações](#observações)
 
-## 🛠️ Tecnologias Utilizadas
+---
 
-- Python 3
-- Flask
-- SQLAlchemy
-- Flasgger (Swagger UI)
-- Docker
+## 🔎 Visão Geral
+O sistema é composto por três microsserviços principais:
 
-## 📦 Como Executar
+1. **Gerenciamento:** Cadastro e consulta de alunos, turmas e professores.  
+2. **Atividades-Notas:** Gerenciamento de atividades e notas dos alunos.  
+3. **Reservas:** Gerenciamento de reservas de salas e laboratórios para turmas.  
 
-### Pré-requisitos
+Cada serviço possui sua própria base de dados e expõe **APIs RESTful** para integração.
 
-- [Docker](https://www.docker.com/) instalado
+---
 
-### Passos
+## ⚙️ Microsserviços
 
-1. **Clone o repositório:**
+### 1. Gerenciamento
+Responsável pelo cadastro e consulta de:
+- Alunos  
+- Turmas  
+- Professores  
+
+### 2. Atividades-Notas
+Responsável por:
+- Cadastro de atividades  
+- Lançamento e consulta de notas dos alunos  
+
+### 3. Reservas
+Responsável por:
+- Cadastro, consulta, atualização e remoção de reservas de salas/laboratórios  
+- Integração com o serviço de **Gerenciamento** para validação de turmas
+
+## 🧩 Arquitetura
+
++-------------------+ +---------------------+ +------------------+
+| Gerenciamento |<---->| Atividades-Notas |<---->| Reservas |
++-------------------+ +---------------------+ +------------------+
+^ ^ ^
+| | |
++------------------------+-----------------------------+
+(Comunicação via HTTP/REST)
+
+
+Cada microsserviço roda em um **container Docker separado**, e a comunicação entre eles é feita via **HTTP**.
+
+---
+
+## 🚀 Como Executar
+
+### 🔧 Pré-requisitos
+- Docker  
+- Docker Compose  
+
+### 🪜 Passos
+
+1. **Clone este repositório:**
    ```bash
-   git clone https://github.com/seu-usuario/escola-api.git
-   
-Construa e suba o container:
+   git clone <url-do-repositorio>
+   cd <nome-do-repositorio>
 
-docker compose up --build
+2. **Execute todos os microsserviços com Docker Compose:**
+   ```bash
+   docker-compose up --build
 
-Acesse a API:
+3. **Acesse os serviços nas seguintes portas:**
 
-A API estará disponível em: http://localhost:5000
-A documentação Swagger estará em: http://localhost:5000/apidocs
+   Gerenciamento → http://localhost:5000
 
+   Atividades-Notas → http://localhost:5001
 
-📑 Exemplos de Rotas
+   Reservas → http://localhost:5002
 
-**Professores**
-GET /professores — Lista todos os professores
-POST /professores — Cria um novo professor
-PUT /professores/<id> — Atualiza um professor
-DELETE /professores/<id> — Remove um professor
+### 🌐 Rotas Principais
 
-**Turmas**
-GET /turmas — Lista todas as turmas
-POST /turmas — Cria uma nova turma
-PUT /turmas/<id> — Atualiza uma turma
-DELETE /turmas/<id> — Remove uma turma
+🧾 Gerenciamento
+Método	     Rota                  Descrição
+GET	    /alunos	               Lista alunos
+POST	    /alunos	               Cria aluno
+GET	    /turmas	               Lista turmas
+POST	    /turmas	               Cria turma
+GET	    /professores	         Lista professores
+POST 	    /professores	         Cria professor
 
-**Alunos**
-GET /alunos — Lista todos os alunos
-POST /alunos — Cria um novo aluno
-PUT /alunos/<id> — Atualiza um aluno
-DELETE /alunos/<id> — Remove um aluno
+### 🧮 Atividades-Notas
+Método	      Rota	               Descrição
+GET	    /atividades	         Lista atividades
+POST	    /atividades	         Cria atividade
+GET	    /notas	               Lista notas
+POST	    /notas	               Lança nota
 
+### 🏫 Reservas
+Método	      Rotas	               Descrição
+GET	    /reservas	            Lista reservas
+POST	    /reservas	            Cria reserva (valida turma no Gerenciamento)
+GET	    /reservas/<id>	      Consulta reserva por ID
+PUT	    /reservas/<id>	      Atualiza reserva
+DELETE	 /reservas/<id>	      Remove reserva
 
-🗂️ Estrutura do Projeto
+### 💻 Exemplo de Uso
 
-escola-api/
-│
-├── app.py
-├── controller/
-│   └── route.py
-├── models/
-│   ├── __init__.py
-│   ├── aluno_model.py
-│   ├── professor_model.py
-│   ├── turma_model.py
-│   └── database.py
-├── requirements.txt
-├── docker-compose.yml
-├── Dockerfile
-└── README.md
+Criar uma nova reserva (requisição para o serviço Reservas):
 
+   POST /reservas
+   Content-Type: application/json
 
-📝 Observações
-O banco de dados utilizado é SQLite e o arquivo database.db é persistido no volume do Docker.
-As configurações sensíveis (como SECRET_KEY) são geradas automaticamente, mas podem ser ajustadas conforme necessário.
+   {
+      "num_sala": 101,
+      "lab": true,
+      "data": "2025-10-22",
+      "turma_id": 1
+   }
 
+### 📖 Documentação Swagger
 
-📄 Licença
-Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+Cada microsserviço expõe sua documentação interativa via Swagger:
+
+Gerenciamento →    http://localhost:5000/apidocs
+
+Atividades-Notas → http://localhost:5001/apidocs
+
+Reservas →         http://localhost:5002/apidocs
+
+### 🧰 Dependências
+
+Principais bibliotecas utilizadas (em cada microsserviço):
+
+Flask
+Flask-SQLAlchemy
+Flasgger (Swagger UI)
+Requests (para comunicação entre serviços)
+
+## Instale as dependências localmente com:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## 📝 Observações
+
+Cada microsserviço possui seu próprio banco SQLite.
+
+A comunicação entre os serviços é feita via HTTP interno (ex: o serviço Reservas consulta o Gerenciamento para validar turmas).
+
+Para ambiente produtivo, recomenda-se:
+
+uso de bancos externos (ex: PostgreSQL, MySQL);
+
+configuração de variáveis de ambiente seguras;
+
+uso de Docker networks dedicadas.
+
+O projeto segue uma arquitetura desacoplada, facilitando manutenção e escalabilidade.
