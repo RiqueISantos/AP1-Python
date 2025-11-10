@@ -307,11 +307,15 @@ def setup_routes(app):
 
         if not atv:
             return jsonify({'erro': 'Nenhuma atividade encontrada!'}), 404
-        
+
+        # Remove notas relacionadas antes de apagar a atividade
+        db.session.query(Notas).filter(Notas.atividade_id == atv.id).delete(synchronize_session=False)
+
         db.session.delete(atv)
         db.session.commit()
 
         return jsonify({'mensagem': 'Atividade deletada com sucesso!'}), 200
+
     
 
     # CRUD NOTAS

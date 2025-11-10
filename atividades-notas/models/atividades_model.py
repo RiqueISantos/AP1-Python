@@ -12,4 +12,4 @@ class Atividades(db.Model):
     turma_id = db.Column(db.Integer, nullable=False)
     professor_id = db.Column(db.Integer, nullable=False)
 
-    notas = db.relationship('Notas', backref='atividade', lazy=True)
+    notas = db.relationship('Notas', backref='atividade', lazy=True, cascade='all, delete-orphan')
