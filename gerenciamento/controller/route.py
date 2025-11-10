@@ -36,7 +36,7 @@ def setup_routes(app):
         Obtém um Professor pelo ID
         ---
         tags:
-          - professor
+          - Professores
         summary: Recupera um professor específico
         parameters:
           - in: path
@@ -344,7 +344,25 @@ def setup_routes(app):
 
     @app.route('/alunos/<int:id>', methods=['GET'])
     def get_aluno(id):
-        
+        """
+        Obtém um Aluno pelo ID
+        ---
+        tags:
+          - Alunos
+        summary: Recupera um aluno específico
+        parameters:
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
+            description: ID do aluno
+        responses:
+          200:
+            description: Aluno encontrado
+          404:
+            description: Aluno não encontrado
+        """
         
         aluno = Aluno.query.get(id)
         if not aluno:

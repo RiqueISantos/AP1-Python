@@ -83,9 +83,9 @@ Cada microsserviço roda em um **container Docker separado**, e a comunicação 
 
    Gerenciamento → http://localhost:5000
 
-   Atividades-Notas → http://localhost:5001
+   Reservas → http://localhost:5001
 
-   Reservas → http://localhost:5002
+   Atividades-Notas → http://localhost:5002
 
 ### 🌐 Rotas Principais
 
