@@ -366,7 +366,7 @@ def setup_routes(app):
         
         aluno = Aluno.query.get(id)
         if not aluno:
-            return jsonify({'erro': 'Aluno não encontrado!'}), 404
+          return jsonify({'erro': 'Aluno não encontrado!'}), 404
         
         return jsonify({
             'id': aluno.id,
@@ -377,7 +377,7 @@ def setup_routes(app):
             'nota_primeiro_semestre': aluno.nota_primeiro_semestre,
             'nota_segundo_semestre': aluno.nota_segundo_semestre,
             'media_final': aluno.media_final
-        })
+        }), 200
 
     @app.route('/alunos', methods=['POST'])
     def create_aluno():
@@ -485,7 +485,11 @@ def setup_routes(app):
           404:
             description: Aluno não encontrado
         """
-        aluno = Aluno.query.get_or_404(id)
+        aluno = Aluno.query.get(id)
+
+        if not aluno:
+            return jsonify({'erro': 'Aluno não encontrado!'}), 404
+        
         db.session.delete(aluno)
         db.session.commit()
-        return jsonify({'message': 'Aluno deletado'})
+        return jsonify({'message': 'Aluno deletado'}), 201
